@@ -1,13 +1,12 @@
 using GlazeWM.Infrastructure.Bussing;
 using GlazeWM.Infrastructure.Common.Commands;
 
-namespace GlazeWM.Infrastructure.Common.CommandHandlers
+namespace GlazeWM.Infrastructure.Common.CommandHandlers;
+
+internal class NoopHandler : ICommandHandler<NoopCommand>
 {
-  internal class NoopHandler : ICommandHandler<NoopCommand>
+  public CommandResponse Handle(NoopCommand command)
   {
-    public CommandResponse Handle(NoopCommand command)
-    {
-      return CommandResponse.Ok;
-    }
+    return CommandResponse.Ok;
   }
 }

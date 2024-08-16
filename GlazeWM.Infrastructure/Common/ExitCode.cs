@@ -1,8 +1,7 @@
-namespace GlazeWM.Infrastructure.Common
+namespace GlazeWM.Infrastructure.Common;
+
+public enum ExitCode
 {
-  public enum ExitCode
-  {
-    Success = 0,
-    Error = 1,
-  }
+  Success = 0,
+  Error = 1,
 }

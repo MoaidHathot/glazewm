@@ -1,7 +1,6 @@
-namespace GlazeWM.Domain.UserConfigs
+namespace GlazeWM.Domain.UserConfigs;
+
+public class TextFileComponentConfig : BarComponentConfig
 {
-  public class TextFileComponentConfig : BarComponentConfig
-  {
-    public string FilePath { get; set; }
-  }
+  public string FilePath { get; set; }
 }

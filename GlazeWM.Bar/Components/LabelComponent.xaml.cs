@@ -1,15 +1,14 @@
 using System.Windows.Controls;
 
-namespace GlazeWM.Bar.Components
+namespace GlazeWM.Bar.Components;
+
+/// <summary>
+/// Interaction logic for LabelComponent.xaml
+/// </summary>
+public partial class LabelComponent : UserControl
 {
-  /// <summary>
-  /// Interaction logic for LabelComponent.xaml
-  /// </summary>
-  public partial class LabelComponent : UserControl
+  public LabelComponent()
   {
-    public LabelComponent()
-    {
-      InitializeComponent();
-    }
+    InitializeComponent();
   }
 }

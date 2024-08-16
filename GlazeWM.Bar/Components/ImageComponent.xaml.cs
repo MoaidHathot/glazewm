@@ -1,15 +1,14 @@
 using System.Windows.Controls;
 
-namespace GlazeWM.Bar.Components
+namespace GlazeWM.Bar.Components;
+
+/// <summary>
+/// Interaction logic for ImageComponent.xaml
+/// </summary>
+public partial class ImageComponent : UserControl
 {
-  /// <summary>
-  /// Interaction logic for ImageComponent.xaml
-  /// </summary>
-  public partial class ImageComponent : UserControl
+  public ImageComponent()
   {
-    public ImageComponent()
-    {
-      InitializeComponent();
-    }
+    InitializeComponent();
   }
 }

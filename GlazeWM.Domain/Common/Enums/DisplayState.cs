@@ -1,12 +1,9 @@
-using System;
+namespace GlazeWM.Domain.Common.Enums;
 
-namespace GlazeWM.Domain.Common.Enums
+public enum DisplayState
 {
-  public enum DisplayState
-  {
-    Shown,
-    Showing,
-    Hidden,
-    Hiding,
-  }
+  Shown,
+  Showing,
+  Hidden,
+  Hiding,
 }

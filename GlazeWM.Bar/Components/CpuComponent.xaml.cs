@@ -1,15 +1,14 @@
 using System.Windows.Controls;
 
-namespace GlazeWM.Bar.Components
+namespace GlazeWM.Bar.Components;
+
+/// <summary>
+/// Interaction logic for CpuComponent.xaml
+/// </summary>
+public partial class CpuComponent : UserControl
 {
-  /// <summary>
-  /// Interaction logic for CpuComponent.xaml
-  /// </summary>
-  public partial class CpuComponent : UserControl
+  public CpuComponent()
   {
-    public CpuComponent()
-    {
-      InitializeComponent();
-    }
+    InitializeComponent();
   }
 }

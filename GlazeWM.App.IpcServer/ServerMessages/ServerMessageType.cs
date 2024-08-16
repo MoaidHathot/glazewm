@@ -1,8 +1,7 @@
-namespace GlazeWM.App.IpcServer.ServerMessages
+namespace GlazeWM.App.IpcServer.ServerMessages;
+
+internal enum ServerMessageType
 {
-  internal enum ServerMessageType
-  {
-    ClientResponse,
-    EventSubscription
-  }
+  ClientResponse,
+  EventSubscription
 }

@@ -1,8 +1,7 @@
-namespace GlazeWM.Domain.UserConfigs
+namespace GlazeWM.Domain.UserConfigs;
+
+public enum BarPosition
 {
-  public enum BarPosition
-  {
-    Top,
-    Bottom
-  }
+  Top,
+  Bottom
 }

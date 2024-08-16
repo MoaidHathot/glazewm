@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Windows.Threading;
 using GlazeWM.Domain.Common.Enums;
@@ -9,50 +7,49 @@ using GlazeWM.Domain.UserConfigs;
 using GlazeWM.Infrastructure;
 using GlazeWM.Infrastructure.Bussing;
 
-namespace GlazeWM.Bar.Components
+namespace GlazeWM.Bar.Components;
+
+public class TilingDirectionComponentViewModel : ComponentViewModel
 {
-  public class TilingDirectionComponentViewModel : ComponentViewModel
+  private Dispatcher _dispatcher => _parentViewModel.Dispatcher;
+  private readonly Bus _bus = ServiceLocator.GetRequiredService<Bus>();
+  private readonly ContainerService _containerService =
+    ServiceLocator.GetRequiredService<ContainerService>();
+
+  private readonly TilingDirectionComponentConfig _config;
+
+  private LabelViewModel _label;
+  public LabelViewModel Label
   {
-    private Dispatcher _dispatcher => _parentViewModel.Dispatcher;
-    private readonly Bus _bus = ServiceLocator.GetRequiredService<Bus>();
-    private readonly ContainerService _containerService =
-      ServiceLocator.GetRequiredService<ContainerService>();
+    get => _label;
+    protected set => SetField(ref _label, value);
+  }
 
-    private readonly TilingDirectionComponentConfig _config;
+  public TilingDirectionComponentViewModel(
+    BarViewModel parentViewModel,
+    TilingDirectionComponentConfig config) : base(parentViewModel, config)
+  {
+    _config = config;
 
-    private LabelViewModel _label;
-    public LabelViewModel Label
-    {
-      get => _label;
-      protected set => SetField(ref _label, value);
-    }
+    _bus.Events.Where(
+      (@event) => @event is TilingDirectionChangedEvent or FocusChangedEvent
+    )
+      .TakeUntil(_parentViewModel.WindowClosing)
+      .Subscribe((_) => _dispatcher.Invoke(() => Label = CreateLabel()));
+  }
 
-    public TilingDirectionComponentViewModel(
-      BarViewModel parentViewModel,
-      TilingDirectionComponentConfig config) : base(parentViewModel, config)
-    {
-      _config = config;
+  private LabelViewModel CreateLabel()
+  {
+    // The tiling direction of the currently focused container. Can be null on app
+    // startup when workspaces haven't been created yet.
+    var tilingDirection =
+      (_containerService.FocusedContainer as SplitContainer)?.TilingDirection ??
+      (_containerService.FocusedContainer.Parent as SplitContainer)?.TilingDirection;
 
-      _bus.Events.Where(
-        (@event) => @event is TilingDirectionChangedEvent or FocusChangedEvent
-      )
-        .TakeUntil(_parentViewModel.WindowClosing)
-        .Subscribe((_) => _dispatcher.Invoke(() => Label = CreateLabel()));
-    }
+    var label = tilingDirection == TilingDirection.Vertical
+      ? _config.LabelVertical
+      : _config.LabelHorizontal;
 
-    private LabelViewModel CreateLabel()
-    {
-      // The tiling direction of the currently focused container. Can be null on app
-      // startup when workspaces haven't been created yet.
-      var tilingDirection =
-        (_containerService.FocusedContainer as SplitContainer)?.TilingDirection ??
-        (_containerService.FocusedContainer.Parent as SplitContainer)?.TilingDirection;
-
-      var label = tilingDirection == TilingDirection.Vertical
-        ? _config.LabelVertical
-        : _config.LabelHorizontal;
-
-      return XamlHelper.ParseLabel(label, new Dictionary<string, Func<string>>(), this);
-    }
+    return XamlHelper.ParseLabel(label, new Dictionary<string, Func<string>>(), this);
   }
 }

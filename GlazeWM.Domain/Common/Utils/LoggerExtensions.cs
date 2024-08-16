@@ -1,24 +1,23 @@
 using GlazeWM.Domain.Windows;
 using Microsoft.Extensions.Logging;
 
-namespace GlazeWM.Domain.Common.Utils
+namespace GlazeWM.Domain.Common.Utils;
+
+public static class LoggerExtensions
 {
-  public static class LoggerExtensions
+  /// <summary>
+  /// Extension method for consistently formatting window event logs.
+  /// </summary>
+  public static void LogWindowEvent<T>(
+    this ILogger<T> logger,
+    string message,
+    Window window)
   {
-    /// <summary>
-    /// Extension method for consistently formatting window event logs.
-    /// </summary>
-    public static void LogWindowEvent<T>(
-      this ILogger<T> logger,
-      string message,
-      Window window)
-    {
-      logger.LogDebug(
-        "{Message}: {ProcessName} {ClassName}",
-        message,
-        window.ProcessName,
-        window.ClassName
-      );
-    }
+    logger.LogDebug(
+      "{Message}: {ProcessName} {ClassName}",
+      message,
+      window.ProcessName,
+      window.ClassName
+    );
   }
 }

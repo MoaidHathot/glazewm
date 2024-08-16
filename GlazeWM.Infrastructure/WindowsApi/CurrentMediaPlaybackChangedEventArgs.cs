@@ -1,9 +1,8 @@
 using Windows.Media.Control;
 
-namespace GlazeWM.Infrastructure.WindowsApi
+namespace GlazeWM.Infrastructure.WindowsApi;
+
+public class CurrentMediaPlaybackChangedEventArgs
 {
-  public class CurrentMediaPlaybackChangedEventArgs
-  {
-    public GlobalSystemMediaTransportControlsSessionPlaybackStatus PlaybackState { get; set; }
-  }
+  public GlobalSystemMediaTransportControlsSessionPlaybackStatus PlaybackState { get; set; }
 }

@@ -1,15 +1,14 @@
 using System.Windows.Controls;
 
-namespace GlazeWM.Bar.Components
+namespace GlazeWM.Bar.Components;
+
+/// <summary>
+/// Interaction logic for NotifyIcon.xaml
+/// </summary>
+public partial class NotifyIcon : UserControl
 {
-  /// <summary>
-  /// Interaction logic for NotifyIcon.xaml
-  /// </summary>
-  public partial class NotifyIcon : UserControl
+  public NotifyIcon()
   {
-    public NotifyIcon()
-    {
-      InitializeComponent();
-    }
+    InitializeComponent();
   }
 }

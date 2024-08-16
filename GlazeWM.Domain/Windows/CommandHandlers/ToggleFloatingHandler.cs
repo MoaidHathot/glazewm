@@ -1,27 +1,26 @@
 using GlazeWM.Domain.Windows.Commands;
 using GlazeWM.Infrastructure.Bussing;
 
-namespace GlazeWM.Domain.Windows.CommandHandlers
+namespace GlazeWM.Domain.Windows.CommandHandlers;
+
+internal sealed class ToggleFloatingHandler : ICommandHandler<ToggleFloatingCommand>
 {
-  internal sealed class ToggleFloatingHandler : ICommandHandler<ToggleFloatingCommand>
+  private readonly Bus _bus;
+
+  public ToggleFloatingHandler(Bus bus)
   {
-    private readonly Bus _bus;
+    _bus = bus;
+  }
 
-    public ToggleFloatingHandler(Bus bus)
-    {
-      _bus = bus;
-    }
+  public CommandResponse Handle(ToggleFloatingCommand command)
+  {
+    var window = command.Window;
 
-    public CommandResponse Handle(ToggleFloatingCommand command)
-    {
-      var window = command.Window;
+    if (window is FloatingWindow)
+      _bus.Invoke(new SetTilingCommand(window));
+    else
+      _bus.Invoke(new SetFloatingCommand(window));
 
-      if (window is FloatingWindow)
-        _bus.Invoke(new SetTilingCommand(window));
-      else
-        _bus.Invoke(new SetFloatingCommand(window));
-
-      return CommandResponse.Ok;
-    }
+    return CommandResponse.Ok;
   }
 }

@@ -1,10 +1,9 @@
-namespace GlazeWM.Domain.UserConfigs
+namespace GlazeWM.Domain.UserConfigs;
+
+public class BindingModeComponentConfig : BarComponentConfig
 {
-  public class BindingModeComponentConfig : BarComponentConfig
-  {
-    /// <summary>
-    /// Label assigned to the binding mode component.
-    /// </summary>
-    public string Label { get; set; } = "{binding_mode}";
-  }
+  /// <summary>
+  /// Label assigned to the binding mode component.
+  /// </summary>
+  public string Label { get; set; } = "{binding_mode}";
 }

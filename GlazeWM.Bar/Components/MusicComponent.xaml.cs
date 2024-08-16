@@ -1,15 +1,14 @@
 using System.Windows.Controls;
 
-namespace GlazeWM.Bar.Components
+namespace GlazeWM.Bar.Components;
+
+/// <summary>
+/// Interaction logic for MusicComponent.xaml
+/// </summary>
+public partial class MusicComponent : UserControl
 {
-  /// <summary>
-  /// Interaction logic for MusicComponent.xaml
-  /// </summary>
-  public partial class MusicComponent : UserControl
+  public MusicComponent()
   {
-    public MusicComponent()
-    {
-      InitializeComponent();
-    }
+    InitializeComponent();
   }
 }

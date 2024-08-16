@@ -1,48 +1,43 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
+namespace GlazeWM.App.IpcServer;
 
-namespace GlazeWM.App.IpcServer
+public sealed class IpcServerStartup
 {
-  public sealed class IpcServerStartup
+  private readonly ILogger<IpcServerStartup> _logger;
+  private readonly IpcMessageHandler _ipcMessageHandler;
+
+  public IpcServerStartup(
+    ILogger<IpcServerStartup> logger,
+    IpcMessageHandler ipcMessageHandler)
   {
-    private readonly ILogger<IpcServerStartup> _logger;
-    private readonly IpcMessageHandler _ipcMessageHandler;
+    _logger = logger;
+    _ipcMessageHandler = ipcMessageHandler;
+  }
 
-    public IpcServerStartup(
-      ILogger<IpcServerStartup> logger,
-      IpcMessageHandler ipcMessageHandler)
+  /// <summary>
+  /// Start the IPC server on specified port.
+  /// </summary>
+  public void Run(int port)
+  {
+    _logger.LogDebug("Starting IPC server on port {Port}.", port);
+
+    _ipcMessageHandler.Init();
+
+    var builder = WebApplication.CreateBuilder();
+    builder.Logging.ClearProviders();
+    builder.WebHost.UseUrls($"http://localhost:{port}");
+
+    var app = builder.Build();
+    app.UseWebSockets();
+
+    app.Use(async (context, next) =>
     {
-      _logger = logger;
-      _ipcMessageHandler = ipcMessageHandler;
-    }
+      if (!context.WebSockets.IsWebSocketRequest)
+        await next();
 
-    /// <summary>
-    /// Start the IPC server on specified port.
-    /// </summary>
-    public void Run(int port)
-    {
-      _logger.LogDebug("Starting IPC server on port {Port}.", port);
+      using var ws = await context.WebSockets.AcceptWebSocketAsync();
+      await _ipcMessageHandler.Handle(ws);
+    });
 
-      _ipcMessageHandler.Init();
-
-      var builder = WebApplication.CreateBuilder();
-      builder.Logging.ClearProviders();
-      builder.WebHost.UseUrls($"http://localhost:{port}");
-
-      var app = builder.Build();
-      app.UseWebSockets();
-
-      app.Use(async (context, next) =>
-      {
-        if (!context.WebSockets.IsWebSocketRequest)
-          await next();
-
-        using var ws = await context.WebSockets.AcceptWebSocketAsync();
-        await _ipcMessageHandler.Handle(ws);
-      });
-
-      app.Run();
-    }
+    app.Run();
   }
 }

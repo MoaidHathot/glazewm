@@ -1,43 +1,41 @@
-using System;
 using Vostok.Sys.Metrics.PerfCounters;
 
-namespace GlazeWM.Infrastructure.WindowsApi
+namespace GlazeWM.Infrastructure.WindowsApi;
+
+/// <summary>
+/// Provides access to current CPU statistics.
+/// </summary>
+public class CpuStatsService : IDisposable
 {
-  /// <summary>
-  /// Provides access to current CPU statistics.
-  /// </summary>
-  public class CpuStatsService : IDisposable
+  private readonly IPerformanceCounter<double> _cpuCounter =
+    PerformanceCounterFactory.Default.CreateCounter(
+      "Processor Information",
+      "% Processor Utility",
+      "_Total"
+    );
+
+  /// <inheritdoc />
+  ~CpuStatsService() => Dispose();
+
+  /// <inheritdoc />
+  public void Dispose()
   {
-    private readonly IPerformanceCounter<double> _cpuCounter =
-      PerformanceCounterFactory.Default.CreateCounter(
-        "Processor Information",
-        "% Processor Utility",
-        "_Total"
-      );
+    _cpuCounter.Dispose();
+    GC.SuppressFinalize(this);
+  }
 
-    /// <inheritdoc />
-    ~CpuStatsService() => Dispose();
-
-    /// <inheritdoc />
-    public void Dispose()
+  /// <summary>
+  /// Returns the current CPU utilization as a percentage.
+  /// </summary>
+  public double GetCpuUsage()
+  {
+    try
     {
-      _cpuCounter.Dispose();
-      GC.SuppressFinalize(this);
+      return _cpuCounter.Observe();
     }
-
-    /// <summary>
-    /// Returns the current CPU utilization as a percentage.
-    /// </summary>
-    public double GetCpuUsage()
+    catch
     {
-      try
-      {
-        return _cpuCounter.Observe();
-      }
-      catch
-      {
-        return 0;
-      }
+      return 0;
     }
   }
 }

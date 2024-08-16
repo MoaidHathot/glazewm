@@ -1,4 +1,3 @@
-using System.Linq;
 using GlazeWM.Domain.Common.Enums;
 using GlazeWM.Domain.Common.Utils;
 using GlazeWM.Domain.Containers;
@@ -12,104 +11,103 @@ using GlazeWM.Infrastructure.Common.Events;
 using GlazeWM.Infrastructure.WindowsApi;
 using Microsoft.Extensions.Logging;
 
-namespace GlazeWM.Domain.Windows.EventHandlers
+namespace GlazeWM.Domain.Windows.EventHandlers;
+
+internal sealed class WindowMovedOrResizedHandler : IEventHandler<WindowMovedOrResizedEvent>
 {
-  internal sealed class WindowMovedOrResizedHandler : IEventHandler<WindowMovedOrResizedEvent>
+  private readonly Bus _bus;
+  private readonly WindowService _windowService;
+  private readonly MonitorService _monitorService;
+  private readonly ContainerService _containerService;
+  private readonly ILogger<WindowMovedOrResizedHandler> _logger;
+
+  public WindowMovedOrResizedHandler(
+    Bus bus,
+    WindowService windowService,
+    MonitorService monitorService,
+    ILogger<WindowMovedOrResizedHandler> logger,
+    ContainerService containerService)
   {
-    private readonly Bus _bus;
-    private readonly WindowService _windowService;
-    private readonly MonitorService _monitorService;
-    private readonly ContainerService _containerService;
-    private readonly ILogger<WindowMovedOrResizedHandler> _logger;
+    _bus = bus;
+    _windowService = windowService;
+    _monitorService = monitorService;
+    _logger = logger;
+    _containerService = containerService;
+  }
 
-    public WindowMovedOrResizedHandler(
-      Bus bus,
-      WindowService windowService,
-      MonitorService monitorService,
-      ILogger<WindowMovedOrResizedHandler> logger,
-      ContainerService containerService)
+  public void Handle(WindowMovedOrResizedEvent @event)
+  {
+    var window = _windowService.GetWindows().FirstOrDefault(window => window.Handle == @event.WindowHandle);
+
+    if (window is null)
+      return;
+
+    _logger.LogWindowEvent("Window moved/resized", window);
+
+    if (window is TilingWindow)
     {
-      _bus = bus;
-      _windowService = windowService;
-      _monitorService = monitorService;
-      _logger = logger;
-      _containerService = containerService;
+      UpdateTilingWindow(window as TilingWindow);
+      return;
     }
 
-    public void Handle(WindowMovedOrResizedEvent @event)
+    if (window is FloatingWindow)
+      UpdateFloatingWindow(window as FloatingWindow);
+  }
+
+  private void UpdateTilingWindow(TilingWindow window)
+  {
+    // Snap window to its original position even if it's not being resized.
+    var hasNoResizableSiblings = window.Parent is Workspace
+    && !window.SiblingsOfType<IResizable>().Any();
+
+    if (hasNoResizableSiblings)
     {
-      var window = _windowService.GetWindows().FirstOrDefault(window => window.Handle == @event.WindowHandle);
-
-      if (window is null)
-        return;
-
-      _logger.LogWindowEvent("Window moved/resized", window);
-
-      if (window is TilingWindow)
-      {
-        UpdateTilingWindow(window as TilingWindow);
-        return;
-      }
-
-      if (window is FloatingWindow)
-        UpdateFloatingWindow(window as FloatingWindow);
-    }
-
-    private void UpdateTilingWindow(TilingWindow window)
-    {
-      // Snap window to its original position even if it's not being resized.
-      var hasNoResizableSiblings = window.Parent is Workspace
-      && !window.SiblingsOfType<IResizable>().Any();
-
-      if (hasNoResizableSiblings)
-      {
-        _containerService.ContainersToRedraw.Add(window);
-        _bus.Invoke(new RedrawContainersCommand());
-        return;
-      }
-
-      // Remove invisible borders from current placement to be able to compare window width/height.
-      var currentPlacement = WindowService.GetPlacementOfHandle(window.Handle).NormalPosition;
-      var adjustedPlacement = new Rect
-      {
-        Left = currentPlacement.Left + window.BorderDelta.Left,
-        Right = currentPlacement.Right - window.BorderDelta.Right,
-        Top = currentPlacement.Top + window.BorderDelta.Top,
-        Bottom = currentPlacement.Bottom - window.BorderDelta.Bottom,
-      };
-
-      var deltaWidth = adjustedPlacement.Width - window.Width;
-      var deltaHeight = adjustedPlacement.Height - window.Height;
-
-      _bus.Invoke(new ResizeWindowCommand(window, ResizeDimension.Width, $"{deltaWidth}px"));
-      _bus.Invoke(new ResizeWindowCommand(window, ResizeDimension.Height, $"{deltaHeight}px"));
+      _containerService.ContainersToRedraw.Add(window);
       _bus.Invoke(new RedrawContainersCommand());
+      return;
     }
 
-    private void UpdateFloatingWindow(FloatingWindow window)
+    // Remove invisible borders from current placement to be able to compare window width/height.
+    var currentPlacement = WindowService.GetPlacementOfHandle(window.Handle).NormalPosition;
+    var adjustedPlacement = new Rect
     {
-      // Update state with new location of the floating window.
-      window.FloatingPlacement = WindowService.GetPlacementOfHandle(window.Handle).NormalPosition;
+      Left = currentPlacement.Left + window.BorderDelta.Left,
+      Right = currentPlacement.Right - window.BorderDelta.Right,
+      Top = currentPlacement.Top + window.BorderDelta.Top,
+      Bottom = currentPlacement.Bottom - window.BorderDelta.Bottom,
+    };
 
-      // Change floating window's parent workspace if out of its bounds.
-      UpdateParentWorkspace(window);
-    }
+    var deltaWidth = adjustedPlacement.Width - window.Width;
+    var deltaHeight = adjustedPlacement.Height - window.Height;
 
-    private void UpdateParentWorkspace(Window window)
-    {
-      var currentWorkspace = WorkspaceService.GetWorkspaceFromChildContainer(window);
+    _bus.Invoke(new ResizeWindowCommand(window, ResizeDimension.Width, $"{deltaWidth}px"));
+    _bus.Invoke(new ResizeWindowCommand(window, ResizeDimension.Height, $"{deltaHeight}px"));
+    _bus.Invoke(new RedrawContainersCommand());
+  }
 
-      // Get workspace that encompasses most of the window.
-      var targetMonitor = _monitorService.GetMonitorFromHandleLocation(window.Handle);
-      var targetWorkspace = targetMonitor.DisplayedWorkspace;
+  private void UpdateFloatingWindow(FloatingWindow window)
+  {
+    // Update state with new location of the floating window.
+    window.FloatingPlacement = WindowService.GetPlacementOfHandle(window.Handle).NormalPosition;
 
-      // Ignore if window is still within the bounds of its current workspace.
-      if (currentWorkspace == targetWorkspace)
-        return;
+    // Change floating window's parent workspace if out of its bounds.
+    UpdateParentWorkspace(window);
+  }
 
-      // Change the window's parent workspace.
-      _bus.Invoke(new MoveContainerWithinTreeCommand(window, targetWorkspace));
-      _bus.Emit(new FocusChangedEvent(window));
-    }
+  private void UpdateParentWorkspace(Window window)
+  {
+    var currentWorkspace = WorkspaceService.GetWorkspaceFromChildContainer(window);
+
+    // Get workspace that encompasses most of the window.
+    var targetMonitor = _monitorService.GetMonitorFromHandleLocation(window.Handle);
+    var targetWorkspace = targetMonitor.DisplayedWorkspace;
+
+    // Ignore if window is still within the bounds of its current workspace.
+    if (currentWorkspace == targetWorkspace)
+      return;
+
+    // Change the window's parent workspace.
+    _bus.Invoke(new MoveContainerWithinTreeCommand(window, targetWorkspace));
+    _bus.Emit(new FocusChangedEvent(window));
   }
 }

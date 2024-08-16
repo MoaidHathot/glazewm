@@ -1,8 +1,7 @@
 using GlazeWM.Infrastructure.Bussing;
 
-namespace GlazeWM.Infrastructure.Common.Commands
+namespace GlazeWM.Infrastructure.Common.Commands;
+
+public class NoopCommand : Command
 {
-  public class NoopCommand : Command
-  {
-  }
 }

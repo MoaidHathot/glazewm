@@ -1,94 +1,91 @@
-using System;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace GlazeWM.Domain.Common
+namespace GlazeWM.Domain.Common;
+
+public class IpcClient : IDisposable
 {
-  public class IpcClient : IDisposable
+  private readonly ClientWebSocket _ws = new();
+  private readonly int _port;
+
+  public IpcClient(int port)
   {
-    private readonly ClientWebSocket _ws = new();
-    private readonly int _port;
+    _port = port;
+  }
 
-    public IpcClient(int port)
-    {
-      _port = port;
-    }
+  public async Task ConnectAsync()
+  {
+    await _ws.ConnectAsync(
+      new Uri($"ws://localhost:{_port}"),
+      CancellationToken.None
+    );
+  }
 
-    public async Task ConnectAsync()
+  public async Task<JsonElement> ReceiveAsync()
+  {
+    var buffer = new byte[1024 * 4];
+
+    // Continuously listen until a text message is received.
+    while (true)
     {
-      await _ws.ConnectAsync(
-        new Uri($"ws://localhost:{_port}"),
+      var result = await _ws.ReceiveAsync(
+        new ArraySegment<byte>(buffer),
         CancellationToken.None
       );
+
+      if (result.MessageType != WebSocketMessageType.Text)
+        continue;
+
+      var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+      return ParseMessage(message);
     }
+  }
 
-    public async Task<JsonElement> ReceiveAsync()
-    {
-      var buffer = new byte[1024 * 4];
+  private async Task SendTextAsync(string message)
+  {
+    var messageBytes = Encoding.UTF8.GetBytes(message);
 
-      // Continuously listen until a text message is received.
-      while (true)
-      {
-        var result = await _ws.ReceiveAsync(
-          new ArraySegment<byte>(buffer),
-          CancellationToken.None
-        );
+    await _ws.SendAsync(
+      new ArraySegment<byte>(messageBytes),
+      WebSocketMessageType.Text,
+      true,
+      CancellationToken.None
+    );
+  }
 
-        if (result.MessageType != WebSocketMessageType.Text)
-          continue;
+  public async Task<JsonElement> SendAndWaitReplyAsync(string message)
+  {
+    await SendTextAsync(message);
+    return await ReceiveAsync();
+  }
 
-        var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-        return ParseMessage(message);
-      }
-    }
+  /// <summary>
+  /// Parse JSON in server message.
+  /// </summary>
+  private static JsonElement ParseMessage(string message)
+  {
+    var parsedMessage = JsonDocument.Parse(message).RootElement;
+    var error = parsedMessage.GetProperty("error").GetString();
 
-    private async Task SendTextAsync(string message)
-    {
-      var messageBytes = Encoding.UTF8.GetBytes(message);
+    if (error is not null)
+      throw new Exception(error);
 
-      await _ws.SendAsync(
-        new ArraySegment<byte>(messageBytes),
-        WebSocketMessageType.Text,
-        true,
-        CancellationToken.None
-      );
-    }
+    return parsedMessage.GetProperty("data");
+  }
 
-    public async Task<JsonElement> SendAndWaitReplyAsync(string message)
-    {
-      await SendTextAsync(message);
-      return await ReceiveAsync();
-    }
+  public async Task DisconnectAsync()
+  {
+    await _ws.CloseAsync(
+      WebSocketCloseStatus.NormalClosure,
+      null,
+      CancellationToken.None
+    );
+  }
 
-    /// <summary>
-    /// Parse JSON in server message.
-    /// </summary>
-    private static JsonElement ParseMessage(string message)
-    {
-      var parsedMessage = JsonDocument.Parse(message).RootElement;
-      var error = parsedMessage.GetProperty("error").GetString();
-
-      if (error is not null)
-        throw new Exception(error);
-
-      return parsedMessage.GetProperty("data");
-    }
-
-    public async Task DisconnectAsync()
-    {
-      await _ws.CloseAsync(
-        WebSocketCloseStatus.NormalClosure,
-        null,
-        CancellationToken.None
-      );
-    }
-
-    public void Dispose()
-    {
-      _ws.Dispose();
-    }
+  public void Dispose()
+  {
+    _ws.Dispose();
+    GC.SuppressFinalize(this);
   }
 }

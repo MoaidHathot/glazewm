@@ -1,7 +1,6 @@
-namespace GlazeWM.Domain.Containers
+namespace GlazeWM.Domain.Containers;
+
+public interface IResizable
 {
-  public interface IResizable
-  {
-    double SizePercentage { get; set; }
-  }
+  double SizePercentage { get; set; }
 }

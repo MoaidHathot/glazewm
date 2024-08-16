@@ -1,9 +1,8 @@
 using CommandLine;
 
-namespace GlazeWM.Domain.Common
+namespace GlazeWM.Domain.Common;
+
+[Verb("watcher")]
+public class WatcherStartupOptions
 {
-  [Verb("watcher")]
-  public class WatcherStartupOptions
-  {
-  }
 }

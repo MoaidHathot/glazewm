@@ -1,7 +1,6 @@
-namespace GlazeWM.Infrastructure.Bussing
+namespace GlazeWM.Infrastructure.Bussing;
+
+public interface ICommandHandler<TCommand> where TCommand : Command
 {
-  public interface ICommandHandler<TCommand> where TCommand : Command
-  {
-    CommandResponse Handle(TCommand command);
-  }
+  CommandResponse Handle(TCommand command);
 }

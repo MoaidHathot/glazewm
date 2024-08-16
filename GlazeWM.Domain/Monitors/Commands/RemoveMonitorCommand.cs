@@ -1,14 +1,13 @@
 using GlazeWM.Infrastructure.Bussing;
 
-namespace GlazeWM.Domain.Monitors.Commands
-{
-  public class RemoveMonitorCommand : Command
-  {
-    public Monitor MonitorToRemove { get; set; }
+namespace GlazeWM.Domain.Monitors.Commands;
 
-    public RemoveMonitorCommand(Monitor monitorToRemove)
-    {
-      MonitorToRemove = monitorToRemove;
-    }
+public class RemoveMonitorCommand : Command
+{
+  public Monitor MonitorToRemove { get; set; }
+
+  public RemoveMonitorCommand(Monitor monitorToRemove)
+  {
+    MonitorToRemove = monitorToRemove;
   }
 }

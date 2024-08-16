@@ -1,8 +1,7 @@
 using GlazeWM.Infrastructure.Bussing;
 
-namespace GlazeWM.Domain.Containers.Commands
+namespace GlazeWM.Domain.Containers.Commands;
+
+public class ToggleFocusModeCommand : Command
 {
-  public class ToggleFocusModeCommand : Command
-  {
-  }
 }

@@ -2,8 +2,7 @@ using GlazeWM.Domain.Common;
 using GlazeWM.Domain.Common.Enums;
 using GlazeWM.Infrastructure.Bussing;
 
-namespace GlazeWM.Domain.Containers.Events
-{
-  public record TilingDirectionChangedEvent(TilingDirection NewTilingDirection)
-    : Event(DomainEvent.TilingDirectionChanged);
-}
+namespace GlazeWM.Domain.Containers.Events;
+
+public record TilingDirectionChangedEvent(TilingDirection NewTilingDirection)
+  : Event(DomainEvent.TilingDirectionChanged);

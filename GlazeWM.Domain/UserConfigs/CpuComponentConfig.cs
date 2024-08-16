@@ -1,15 +1,14 @@
-namespace GlazeWM.Domain.UserConfigs
-{
-  public class CpuComponentConfig : BarComponentConfig
-  {
-    /// <summary>
-    /// Label assigned to the CPU component.
-    /// </summary>
-    public string Label { get; set; } = "CPU: {percent_usage}%";
+namespace GlazeWM.Domain.UserConfigs;
 
-    /// <summary>
-    /// How often this component refreshes in milliseconds.
-    /// </summary>
-    public int RefreshIntervalMs { get; set; } = 1000;
-  }
+public class CpuComponentConfig : BarComponentConfig
+{
+  /// <summary>
+  /// Label assigned to the CPU component.
+  /// </summary>
+  public string Label { get; set; } = "CPU: {percent_usage}%";
+
+  /// <summary>
+  /// How often this component refreshes in milliseconds.
+  /// </summary>
+  public int RefreshIntervalMs { get; set; } = 1000;
 }

@@ -1,70 +1,67 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using GlazeWM.Domain.UserConfigs;
 using GlazeWM.Infrastructure;
 using GlazeWM.Infrastructure.WindowsApi;
 
-namespace GlazeWM.Bar.Components
+namespace GlazeWM.Bar.Components;
+
+public class VolumeComponentViewModel : ComponentViewModel
 {
-  public class VolumeComponentViewModel : ComponentViewModel
+  private readonly VolumeComponentConfig _config;
+
+  private readonly SystemVolumeInformation _sysVolume =
+    ServiceLocator.GetRequiredService<SystemVolumeInformation>();
+
+  private LabelViewModel _label;
+  public LabelViewModel Label
   {
-    private readonly VolumeComponentConfig _config;
+    get => _label;
+    protected set => SetField(ref _label, value);
+  }
 
-    private readonly SystemVolumeInformation _sysVolume =
-      ServiceLocator.GetRequiredService<SystemVolumeInformation>();
+  public VolumeComponentViewModel(
+    BarViewModel parentViewModel,
+    VolumeComponentConfig config) : base(parentViewModel, config)
+  {
+    _config = config;
 
-    private LabelViewModel _label;
-    public LabelViewModel Label
+    var initVolume = _sysVolume.GetVolumeInformation();
+    Label = CreateLabel(initVolume);
+
+    _sysVolume.VolumeChanged += (_, volumeInfo) =>
     {
-      get => _label;
-      protected set => SetField(ref _label, value);
-    }
+      Label = CreateLabel(volumeInfo);
+    };
+  }
 
-    public VolumeComponentViewModel(
-      BarViewModel parentViewModel,
-      VolumeComponentConfig config) : base(parentViewModel, config)
+  private string GetVolumeLabel(VolumeInformation volumeInfo)
+  {
+    if (volumeInfo.Muted)
+      return _config.LabelMute;
+
+    return volumeInfo.Volume switch
     {
-      _config = config;
+      > 0 and < 33 => _config.LabelLow,
+      >= 33 and < 66 => _config.LabelMedium,
+      _ => _config.LabelHigh
+    };
+  }
 
-      var initVolume = _sysVolume.GetVolumeInformation();
-      Label = CreateLabel(initVolume);
+  public LabelViewModel CreateLabel(VolumeInformation volumeInfo)
+  {
+    return XamlHelper.ParseLabel(
+      GetVolumeLabel(volumeInfo),
+      CreateVariableDict(volumeInfo),
+      this
+    );
+  }
 
-      _sysVolume.VolumeChanged += (_, volumeInfo) =>
-      {
-        Label = CreateLabel(volumeInfo);
-      };
-    }
-
-    private string GetVolumeLabel(VolumeInformation volumeInfo)
+  public static Dictionary<string, Func<string>> CreateVariableDict(
+    VolumeInformation volumeInfo)
+  {
+    return new()
     {
-      if (volumeInfo.Muted)
-        return _config.LabelMute;
-
-      return volumeInfo.Volume switch
-      {
-        > 0 and < 33 => _config.LabelLow,
-        >= 33 and < 66 => _config.LabelMedium,
-        _ => _config.LabelHigh
-      };
-    }
-
-    public LabelViewModel CreateLabel(VolumeInformation volumeInfo)
-    {
-      return XamlHelper.ParseLabel(
-        GetVolumeLabel(volumeInfo),
-        CreateVariableDict(volumeInfo),
-        this
-      );
-    }
-
-    public static Dictionary<string, Func<string>> CreateVariableDict(
-      VolumeInformation volumeInfo)
-    {
-      return new()
-      {
-        { "volume_level", () => volumeInfo.Volume.ToString("0", CultureInfo.InvariantCulture) },
-      };
-    }
+      { "volume_level", () => volumeInfo.Volume.ToString("0", CultureInfo.InvariantCulture) },
+    };
   }
 }

@@ -1,15 +1,14 @@
 using System.Windows.Controls;
 
-namespace GlazeWM.Bar.Components
+namespace GlazeWM.Bar.Components;
+
+/// <summary>
+/// Interaction logic for BindingModeComponent.xaml
+/// </summary>
+public partial class BindingModeComponent : UserControl
 {
-  /// <summary>
-  /// Interaction logic for BindingModeComponent.xaml
-  /// </summary>
-  public partial class BindingModeComponent : UserControl
+  public BindingModeComponent()
   {
-    public BindingModeComponent()
-    {
-      InitializeComponent();
-    }
+    InitializeComponent();
   }
 }

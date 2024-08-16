@@ -1,14 +1,13 @@
 using GlazeWM.Infrastructure.Bussing;
 
-namespace GlazeWM.Domain.Workspaces.Commands
-{
-  public class FocusWorkspaceCommand : Command
-  {
-    public string WorkspaceName { get; }
+namespace GlazeWM.Domain.Workspaces.Commands;
 
-    public FocusWorkspaceCommand(string workspaceName)
-    {
-      WorkspaceName = workspaceName;
-    }
+public class FocusWorkspaceCommand : Command
+{
+  public string WorkspaceName { get; }
+
+  public FocusWorkspaceCommand(string workspaceName)
+  {
+    WorkspaceName = workspaceName;
   }
 }

@@ -1,8 +1,7 @@
-namespace GlazeWM.Domain.Common.Enums
+namespace GlazeWM.Domain.Common.Enums;
+
+public enum FocusMode
 {
-  public enum FocusMode
-  {
-    Tiling,
-    Floating,
-  }
+  Tiling,
+  Floating,
 }

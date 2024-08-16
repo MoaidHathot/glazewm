@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using GlazeWM.Domain.Containers.Commands;
 using GlazeWM.Domain.UserConfigs.Commands;
 using GlazeWM.Domain.Windows;
@@ -9,64 +6,63 @@ using GlazeWM.Infrastructure.Common.Commands;
 using GlazeWM.Infrastructure.WindowsApi;
 using static GlazeWM.Infrastructure.WindowsApi.WindowsApiService;
 
-namespace GlazeWM.Domain.UserConfigs.CommandHandlers
+namespace GlazeWM.Domain.UserConfigs.CommandHandlers;
+
+internal sealed class RegisterKeybindingsHandler : ICommandHandler<RegisterKeybindingsCommand>
 {
-  internal sealed class RegisterKeybindingsHandler : ICommandHandler<RegisterKeybindingsCommand>
+  private readonly Bus _bus;
+  private readonly KeybindingService _keybindingService;
+  private readonly WindowService _windowService;
+
+  public RegisterKeybindingsHandler(
+    Bus bus,
+    KeybindingService keybindingService,
+    WindowService windowService)
   {
-    private readonly Bus _bus;
-    private readonly KeybindingService _keybindingService;
-    private readonly WindowService _windowService;
+    _bus = bus;
+    _keybindingService = keybindingService;
+    _windowService = windowService;
+  }
 
-    public RegisterKeybindingsHandler(
-      Bus bus,
-      KeybindingService keybindingService,
-      WindowService windowService)
+  public CommandResponse Handle(RegisterKeybindingsCommand command)
+  {
+    _keybindingService.Reset();
+
+    foreach (var keybindingConfig in command.Keybindings)
     {
-      _bus = bus;
-      _keybindingService = keybindingService;
-      _windowService = windowService;
-    }
+      // Format command strings defined in keybinding config.
+      var commandStrings = keybindingConfig.CommandList.Select(
+        CommandParsingService.FormatCommand
+      );
 
-    public CommandResponse Handle(RegisterKeybindingsCommand command)
-    {
-      _keybindingService.Reset();
-
-      foreach (var keybindingConfig in command.Keybindings)
-      {
-        // Format command strings defined in keybinding config.
-        var commandStrings = keybindingConfig.CommandList.Select(
-          CommandParsingService.FormatCommand
-        );
-
-        // Register all keybindings for a command sequence.
-        foreach (var binding in keybindingConfig.BindingList)
-          _keybindingService.AddGlobalKeybinding(binding, () =>
+      // Register all keybindings for a command sequence.
+      foreach (var binding in keybindingConfig.BindingList)
+        _keybindingService.AddGlobalKeybinding(binding, () =>
+        {
+          Task.Run(() =>
           {
-            Task.Run(() =>
+            try
             {
-              try
+              lock (_bus.LockObj)
               {
-                lock (_bus.LockObj)
-                {
-                  // Avoid invoking keybinding if an ignored window currently has focus.
-                  if (_windowService.IgnoredHandles.Contains(GetForegroundWindow()))
-                    return;
+                // Avoid invoking keybinding if an ignored window currently has focus.
+                if (_windowService.IgnoredHandles.Contains(GetForegroundWindow()))
+                  return;
 
-                  _bus.Invoke(new RunWithSubjectContainerCommand(commandStrings));
-                  _bus.Invoke(new RedrawContainersCommand());
-                  _bus.Invoke(new SyncNativeFocusCommand());
-                }
+                _bus.Invoke(new RunWithSubjectContainerCommand(commandStrings));
+                _bus.Invoke(new RedrawContainersCommand());
+                _bus.Invoke(new SyncNativeFocusCommand());
               }
-              catch (Exception e)
-              {
-                _bus.Invoke(new HandleFatalExceptionCommand(e));
-                throw;
-              }
-            });
+            }
+            catch (Exception e)
+            {
+              _bus.Invoke(new HandleFatalExceptionCommand(e));
+              throw;
+            }
           });
-      }
-
-      return CommandResponse.Ok;
+        });
     }
+
+    return CommandResponse.Ok;
   }
 }

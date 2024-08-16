@@ -1,14 +1,14 @@
 using GlazeWM.Infrastructure.Bussing;
-using GlazeWM.Infrastructure.WindowsApi;
 
-namespace GlazeWM.Domain.Containers.Commands
+using Point = GlazeWM.Infrastructure.WindowsApi.Point;
+
+namespace GlazeWM.Domain.Containers.Commands;
+
+public class FocusContainerUnderCursorCommand : Command
 {
-  public class FocusContainerUnderCursorCommand : Command
+  public Point TargetPoint { get; }
+  public FocusContainerUnderCursorCommand(Point targetPoint)
   {
-    public Point TargetPoint { get; }
-    public FocusContainerUnderCursorCommand(Point targetPoint)
-    {
-      TargetPoint = targetPoint;
-    }
+    TargetPoint = targetPoint;
   }
 }

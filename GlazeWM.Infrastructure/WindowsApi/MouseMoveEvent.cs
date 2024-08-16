@@ -1,8 +1,8 @@
-using System;
 using System.Runtime.InteropServices;
 using GlazeWM.Infrastructure.Bussing;
 using GlazeWM.Infrastructure.Common;
-using GlazeWM.Infrastructure.WindowsApi;
+
+namespace GlazeWM.Infrastructure.WindowsApi;
 
 public record MouseMoveEvent(
   /// <summary>
@@ -29,15 +29,17 @@ public record MouseMoveEvent(
 
 public enum WMessages
 {
+#pragma warning disable CA1707 // Identifiers should not contain underscores
+  WH_KEYBOARD_LL = 13,
+  WH_MOUSE_LL = 14,
+  WM_KEYDOWN = 0x100,
+  WM_KEYUP = 0x101,
   WM_MOUSEMOVE = 0x0200,
   WM_LBUTTONDOWN = 0x201,
   WM_LBUTTONUP = 0x202,
   WM_RBUTTONDOWN = 0x0204,
   WM_RBUTTONUP = 0x0205,
-  WM_KEYDOWN = 0x100,
-  WM_KEYUP = 0x101,
-  WH_KEYBOARD_LL = 13,
-  WH_MOUSE_LL = 14,
+#pragma warning restore CA1707 // Identifiers should not contain underscores
 }
 [StructLayout(LayoutKind.Sequential)]
 public struct LowLevelMouseInputEvent
@@ -84,5 +86,5 @@ public struct LowLevelMouseInputEventDetails
   /// <summary>
   /// Additional information associated with the message.
   /// </summary>
-  public IntPtr dwExtraInfo;
+  public nint dwExtraInfo;
 }

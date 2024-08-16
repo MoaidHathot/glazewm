@@ -1,9 +1,8 @@
-namespace GlazeWM.Domain.UserConfigs
+namespace GlazeWM.Domain.UserConfigs;
+
+public enum WindowAnimations
 {
-  public enum WindowAnimations
-  {
-    Unchanged,
-    True,
-    False
-  }
+  Unchanged,
+  True,
+  False
 }

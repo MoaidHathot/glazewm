@@ -1,71 +1,70 @@
-using System.Collections.Generic;
-using System.Linq;
 using GlazeWM.Domain.Containers;
-using GlazeWM.Domain.Monitors;
 using GlazeWM.Domain.UserConfigs;
 
-namespace GlazeWM.Domain.Workspaces
+using Monitor = GlazeWM.Domain.Monitors.Monitor;
+
+namespace GlazeWM.Domain.Workspaces;
+
+public class WorkspaceService
 {
-  public class WorkspaceService
+  private readonly ContainerService _containerService;
+  private readonly UserConfigService _userConfigService;
+
+  public required Workspace MostRecentWorkspace { get; set; }
+
+  public WorkspaceService(ContainerService containerService, UserConfigService userConfigService)
   {
-    private readonly ContainerService _containerService;
-    private readonly UserConfigService _userConfigService;
+    _containerService = containerService;
+    _userConfigService = userConfigService;
+  }
 
-    public Workspace MostRecentWorkspace { get; set; }
+  /// <summary>
+  /// Get active workspaces by iterating over the 2nd level of container tree.
+  /// </summary>
+  public IEnumerable<Workspace> GetActiveWorkspaces()
+  {
+    return _containerService.ContainerTree.Children
+      .SelectMany(monitor => monitor.Children)
+      .Cast<Workspace>();
+  }
 
-    public WorkspaceService(ContainerService containerService, UserConfigService userConfigService)
-    {
-      _containerService = containerService;
-      _userConfigService = userConfigService;
-    }
+  public Workspace GetActiveWorkspaceByName(string name)
+  {
+    return GetActiveWorkspaces().FirstOrDefault(workspace => workspace.Name == name);
+  }
 
-    /// <summary>
-    /// Get active workspaces by iterating over the 2nd level of container tree.
-    /// </summary>
-    public IEnumerable<Workspace> GetActiveWorkspaces()
-    {
-      return _containerService.ContainerTree.Children
-        .SelectMany(monitor => monitor.Children)
-        .Cast<Workspace>();
-    }
+  public IEnumerable<WorkspaceConfig> GetInactiveWorkspaceConfigs()
+  {
+    var activeWorkspaces = GetActiveWorkspaces();
 
-    public Workspace GetActiveWorkspaceByName(string name)
-    {
-      return GetActiveWorkspaces().FirstOrDefault(workspace => workspace.Name == name);
-    }
+    return _userConfigService.WorkspaceConfigs.Where(
+      (config) => !activeWorkspaces.Any((workspace) => workspace.Name == config.Name)
+    );
+  }
 
-    public IEnumerable<WorkspaceConfig> GetInactiveWorkspaceConfigs()
-    {
-      var activeWorkspaces = GetActiveWorkspaces();
+  public WorkspaceConfig GetWorkspaceConfigToActivate(Monitor monitor)
+  {
+    var inactiveWorkspaceConfigs = GetInactiveWorkspaceConfigs();
+    var boundWorkspaceConfig = inactiveWorkspaceConfigs
+      .FirstOrDefault(config => config.BindToMonitor == monitor.DeviceName);
 
-      return _userConfigService.WorkspaceConfigs.Where(
-        (config) => !activeWorkspaces.Any((workspace) => workspace.Name == config.Name)
-      );
-    }
+    if (boundWorkspaceConfig is not null)
+      return boundWorkspaceConfig;
 
-    public WorkspaceConfig GetWorkspaceConfigToActivate(Monitor monitor)
-    {
-      var inactiveWorkspaceConfigs = GetInactiveWorkspaceConfigs();
-      var boundWorkspaceConfig = inactiveWorkspaceConfigs
-        .FirstOrDefault(config => config.BindToMonitor == monitor.DeviceName);
+    var unreservedWorkspaceConfig = inactiveWorkspaceConfigs
+      .FirstOrDefault(config => string.IsNullOrWhiteSpace(config.BindToMonitor));
 
-      if (boundWorkspaceConfig is not null)
-        return boundWorkspaceConfig;
+    //todo - moaid - null
+    return unreservedWorkspaceConfig ?? inactiveWorkspaceConfigs.ElementAtOrDefault(0)!;
+  }
 
-      var unreservedWorkspaceConfig = inactiveWorkspaceConfigs
-        .FirstOrDefault(config => string.IsNullOrWhiteSpace(config.BindToMonitor));
+  public static Workspace GetWorkspaceFromChildContainer(Container container)
+  {
+    return container.SelfAndAncestors.OfType<Workspace>().FirstOrDefault();
+  }
 
-      return unreservedWorkspaceConfig ?? inactiveWorkspaceConfigs.ElementAtOrDefault(0);
-    }
-
-    public static Workspace GetWorkspaceFromChildContainer(Container container)
-    {
-      return container.SelfAndAncestors.OfType<Workspace>().FirstOrDefault();
-    }
-
-    public Workspace GetFocusedWorkspace()
-    {
-      return GetWorkspaceFromChildContainer(_containerService.FocusedContainer);
-    }
+  public Workspace GetFocusedWorkspace()
+  {
+    return GetWorkspaceFromChildContainer(_containerService.FocusedContainer);
   }
 }

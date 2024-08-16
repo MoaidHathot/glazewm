@@ -1,21 +1,20 @@
-namespace GlazeWM.App.IpcServer.ServerMessages
-{
-  internal sealed record ClientResponseMessage<T>(
-    /// <summary>
-    /// The client message that this is in response to.
-    /// </summary>
-    string ClientMessage,
+namespace GlazeWM.App.IpcServer.ServerMessages;
 
-    /// <inheritdoc/>
-    bool Success,
+internal sealed record ClientResponseMessage<T>(
+  /// <summary>
+  /// The client message that this is in response to.
+  /// </summary>
+  string ClientMessage,
 
-    /// <inheritdoc/>
-    ServerMessageType MessageType,
+  /// <inheritdoc/>
+  bool Success,
 
-    /// <inheritdoc/>
-    T? Data,
+  /// <inheritdoc/>
+  ServerMessageType MessageType,
 
-    /// <inheritdoc/>
-    string? Error
-  ) : ServerMessage<T>(Success, MessageType, Data, Error);
-}
+  /// <inheritdoc/>
+  T? Data,
+
+  /// <inheritdoc/>
+  string? Error
+) : ServerMessage<T>(Success, MessageType, Data, Error);

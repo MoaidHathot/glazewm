@@ -1,8 +1,7 @@
-namespace GlazeWM.Domain.Common.Enums
+namespace GlazeWM.Domain.Common.Enums;
+
+public enum ResizeDimension
 {
-  public enum ResizeDimension
-  {
-    Width,
-    Height,
-  }
+  Width,
+  Height,
 }

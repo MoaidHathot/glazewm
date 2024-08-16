@@ -3,25 +3,24 @@ using GlazeWM.Domain.Workspaces.Commands;
 using GlazeWM.Domain.Workspaces.Events;
 using GlazeWM.Infrastructure.Bussing;
 
-namespace GlazeWM.Domain.Workspaces.CommandHandlers
+namespace GlazeWM.Domain.Workspaces.CommandHandlers;
+
+internal sealed class DeactivateWorkspaceHandler : ICommandHandler<DeactivateWorkspaceCommand>
 {
-  internal sealed class DeactivateWorkspaceHandler : ICommandHandler<DeactivateWorkspaceCommand>
+  public Bus _bus { get; }
+
+  public DeactivateWorkspaceHandler(Bus bus)
   {
-    public Bus _bus { get; }
+    _bus = bus;
+  }
 
-    public DeactivateWorkspaceHandler(Bus bus)
-    {
-      _bus = bus;
-    }
+  public CommandResponse Handle(DeactivateWorkspaceCommand command)
+  {
+    var workspace = command.Workspace;
 
-    public CommandResponse Handle(DeactivateWorkspaceCommand command)
-    {
-      var workspace = command.Workspace;
+    _bus.Invoke(new DetachContainerCommand(workspace));
+    _bus.Emit(new WorkspaceDeactivatedEvent(workspace.Id, workspace.Name));
 
-      _bus.Invoke(new DetachContainerCommand(workspace));
-      _bus.Emit(new WorkspaceDeactivatedEvent(workspace.Id, workspace.Name));
-
-      return CommandResponse.Ok;
-    }
+    return CommandResponse.Ok;
   }
 }

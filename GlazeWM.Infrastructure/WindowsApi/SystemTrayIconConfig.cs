@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
+namespace GlazeWM.Infrastructure.WindowsApi;
 
-namespace GlazeWM.Infrastructure.WindowsApi
+public class SystemTrayIconConfig
 {
-  public class SystemTrayIconConfig
-  {
-    public string HoverText { get; init; }
-    public string IconResourceName { get; init; }
-    public Dictionary<string, Action> Actions { get; init; }
-  }
+  public required string HoverText { get; init; }
+  public required string IconResourceName { get; init; }
+  public required Dictionary<string, Action> Actions { get; init; }
 }

@@ -1,15 +1,14 @@
 using System.Windows.Controls;
 
-namespace GlazeWM.Bar.Components
+namespace GlazeWM.Bar.Components;
+
+/// <summary>
+/// Interaction logic for WorkspacesComponent.xaml
+/// </summary>
+public partial class WorkspacesComponent : UserControl
 {
-  /// <summary>
-  /// Interaction logic for WorkspacesComponent.xaml
-  /// </summary>
-  public partial class WorkspacesComponent : UserControl
+  public WorkspacesComponent()
   {
-    public WorkspacesComponent()
-    {
-      InitializeComponent();
-    }
+    InitializeComponent();
   }
 }

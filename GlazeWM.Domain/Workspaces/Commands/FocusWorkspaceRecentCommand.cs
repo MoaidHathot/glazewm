@@ -1,6 +1,5 @@
 using GlazeWM.Infrastructure.Bussing;
 
-namespace GlazeWM.Domain.Workspaces.Commands
-{
-  public class FocusWorkspaceRecentCommand : Command { }
-}
+namespace GlazeWM.Domain.Workspaces.Commands;
+
+public class FocusWorkspaceRecentCommand : Command { }

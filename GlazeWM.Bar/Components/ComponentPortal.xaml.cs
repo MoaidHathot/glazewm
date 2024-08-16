@@ -1,15 +1,14 @@
 using System.Windows.Controls;
 
-namespace GlazeWM.Bar.Components
+namespace GlazeWM.Bar.Components;
+
+/// <summary>
+/// Interaction logic for ComponentPortal.xaml
+/// </summary>
+public partial class ComponentPortal : UserControl
 {
-  /// <summary>
-  /// Interaction logic for ComponentPortal.xaml
-  /// </summary>
-  public partial class ComponentPortal : UserControl
+  public ComponentPortal()
   {
-    public ComponentPortal()
-    {
-      InitializeComponent();
-    }
+    InitializeComponent();
   }
 }

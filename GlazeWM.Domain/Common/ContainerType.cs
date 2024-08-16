@@ -1,11 +1,10 @@
-namespace GlazeWM.Domain.Common
+namespace GlazeWM.Domain.Common;
+
+public enum ContainerType
 {
-  public enum ContainerType
-  {
-    Root,
-    Monitor,
-    Workspace,
-    Split,
-    Window,
-  }
+  Root,
+  Monitor,
+  Workspace,
+  Split,
+  Window,
 }

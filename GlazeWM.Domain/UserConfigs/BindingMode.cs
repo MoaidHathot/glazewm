@@ -1,11 +1,8 @@
-using System.Collections.Generic;
+namespace GlazeWM.Domain.UserConfigs;
 
-namespace GlazeWM.Domain.UserConfigs
+public class BindingMode
 {
-  public class BindingMode
-  {
-    public string Name { get; set; }
+  public string Name { get; set; }
 
-    public List<KeybindingConfig> Keybindings { get; set; } = new();
-  }
+  public List<KeybindingConfig> Keybindings { get; set; } = new();
 }

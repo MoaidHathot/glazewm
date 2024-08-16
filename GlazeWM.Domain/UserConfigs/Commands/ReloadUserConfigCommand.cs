@@ -1,8 +1,7 @@
 using GlazeWM.Infrastructure.Bussing;
 
-namespace GlazeWM.Domain.UserConfigs.Commands
+namespace GlazeWM.Domain.UserConfigs.Commands;
+
+public class ReloadUserConfigCommand : Command
 {
-  public class ReloadUserConfigCommand : Command
-  {
-  }
 }

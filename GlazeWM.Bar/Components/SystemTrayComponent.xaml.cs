@@ -1,26 +1,25 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace GlazeWM.Bar.Components
+namespace GlazeWM.Bar.Components;
+
+/// <summary>
+/// Interaction logic for SystemTrayComponent.xaml
+/// </summary>
+public partial class SystemTrayComponent : UserControl
 {
-  /// <summary>
-  /// Interaction logic for SystemTrayComponent.xaml
-  /// </summary>
-  public partial class SystemTrayComponent : UserControl
+  public SystemTrayComponent()
   {
-    public SystemTrayComponent()
-    {
-      InitializeComponent();
-    }
+    InitializeComponent();
+  }
 
-    public void OnLabelHoverEnter(object sender, MouseEventArgs e)
-    {
-      Cursor = Cursors.Hand;
-    }
+  public void OnLabelHoverEnter(object sender, MouseEventArgs e)
+  {
+    Cursor = Cursors.Hand;
+  }
 
-    public void OnLabelHoverLeave(object sender, MouseEventArgs e)
-    {
-      Cursor = Cursors.Arrow;
-    }
+  public void OnLabelHoverLeave(object sender, MouseEventArgs e)
+  {
+    Cursor = Cursors.Arrow;
   }
 }

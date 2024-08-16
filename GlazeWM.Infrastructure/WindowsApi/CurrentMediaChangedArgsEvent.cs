@@ -1,9 +1,8 @@
-namespace GlazeWM.Infrastructure.WindowsApi
+namespace GlazeWM.Infrastructure.WindowsApi;
+
+public class CurrentMediaChangedEventArgs
 {
-  public class CurrentMediaChangedEventArgs
-  {
-    public string AlbumTitle { get; set; }
-    public string Artist { get; set; }
-    public string Title { get; set; }
-  }
+  public required string AlbumTitle { get; set; }
+  public required string Artist { get; set; }
+  public required string Title { get; set; }
 }

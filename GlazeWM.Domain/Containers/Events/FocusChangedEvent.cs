@@ -1,8 +1,7 @@
 using GlazeWM.Domain.Common;
 using GlazeWM.Infrastructure.Bussing;
 
-namespace GlazeWM.Domain.Containers.Events
-{
-  public record FocusChangedEvent(Container FocusedContainer)
-    : Event(DomainEvent.FocusChanged);
-}
+namespace GlazeWM.Domain.Containers.Events;
+
+public record FocusChangedEvent(Container FocusedContainer)
+  : Event(DomainEvent.FocusChanged);
